@@ -1,0 +1,70 @@
+pregunta,texto_pregunta,medida,escala_original,n_respuestas_validas,N_formulario,opcion,n,N,porcentaje,porcentaje_publicado,participantes_texto,criterios_asociados,estado
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Analista de Datos / BI,12,54,0.222222,0.22,12 de 54 (22 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Otro,10,54,0.185185,0.19,10 de 54 (19 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Líder / Gerente de Analítica,10,54,0.185185,0.19,10 de 54 (19 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Científico de Datos,9,54,0.166667,0.17,9 de 54 (17 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Ingeniero de Datos,6,54,0.111111,0.11,6 de 54 (11 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Gerente de Proyectos,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Docente,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Administrativa,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Ninguno,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Asesor financiero,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Asistente ejecutivo,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P01,Rol actual principal,Perfil,Opciones del formulario + 'Otro',54,54,Asesor en prevencion,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P02,Años de experiencia en roles de datos,Perfil,Menos de 1 / 1 a 3 / 3 a 5 / Más de 5 años,54,54,1 a 3 años,17,54,0.314815,0.31,17 de 54 (31 %),,encuesta sin cambios (procesada 14-oct-2026)
+P02,Años de experiencia en roles de datos,Perfil,Menos de 1 / 1 a 3 / 3 a 5 / Más de 5 años,54,54,Menos de 1 año,17,54,0.314815,0.31,17 de 54 (31 %),,encuesta sin cambios (procesada 14-oct-2026)
+P02,Años de experiencia en roles de datos,Perfil,Menos de 1 / 1 a 3 / 3 a 5 / Más de 5 años,54,54,Más de 5 años,14,54,0.259259,0.26,14 de 54 (26 %),,encuesta sin cambios (procesada 14-oct-2026)
+P02,Años de experiencia en roles de datos,Perfil,Menos de 1 / 1 a 3 / 3 a 5 / Más de 5 años,54,54,3 a 5 años,6,54,0.111111,0.11,6 de 54 (11 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Especialista,21,53,0.396226,0.4,21 de 53 (40 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Coordinador,14,53,0.264151,0.26,14 de 53 (26 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Directivo,7,53,0.132075,0.13,7 de 53 (13 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Profesional en estadística,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Asistente,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Lider,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Profesional,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Analista,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Parte del equipo,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Auxiliar,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Asesor,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,"Mi cargo es profesional universitario, pero realizo funciones de coordinación",1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Líder y especialista,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P03,Nivel del cargo actual,Perfil,Texto libre,53,54,Asistencial,1,53,0.018868,0.02,1 de 53 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P04,Herramientas más usadas (elegir 3),Uso,Selección múltiple,54,54,"Excel avanzado (Macros, VBA)",33,54,0.611111,0.61,33 de 54 (61 %),TEC_EXCEL,pendiente: regla para respuestas con ≠ 3 opciones
+P04,Herramientas más usadas (elegir 3),Uso,Selección múltiple,54,54,Power BI / Tableau (Visualización),31,54,0.574074,0.57,31 de 54 (57 %),TEC_POWERBI; TEC_TABLEAU,pendiente: regla para respuestas con ≠ 3 opciones
+P04,Herramientas más usadas (elegir 3),Uso,Selección múltiple,54,54,SQL / Bases de datos relacionales,28,54,0.518519,0.52,28 de 54 (52 %),TEC_SQL,pendiente: regla para respuestas con ≠ 3 opciones
+P04,Herramientas más usadas (elegir 3),Uso,Selección múltiple,54,54,Python / R (Programación),26,54,0.481481,0.48,26 de 54 (48 %),TEC_PYTHON; TEC_R,pendiente: regla para respuestas con ≠ 3 opciones
+P04,Herramientas más usadas (elegir 3),Uso,Selección múltiple,54,54,"Plataformas Cloud (AWS, Azure, GCP)",19,54,0.351852,0.35,19 de 54 (35 %),,pendiente: regla para respuestas con ≠ 3 opciones
+P04,Herramientas más usadas (elegir 3),Uso,Selección múltiple,54,54,"Herramientas de Big Data (Spark, Hadoop)",7,54,0.12963,0.13,7 de 54 (13 %),,pendiente: regla para respuestas con ≠ 3 opciones
+P05,Frecuencia de uso de modelos estadísticos avanzados / ML,Uso,1 a 5 (escala original),54,54,1,9,54,0.166667,0.17,9 de 54 (17 %),,encuesta sin cambios (procesada 14-oct-2026)
+P05,Frecuencia de uso de modelos estadísticos avanzados / ML,Uso,1 a 5 (escala original),54,54,2,12,54,0.222222,0.22,12 de 54 (22 %),,encuesta sin cambios (procesada 14-oct-2026)
+P05,Frecuencia de uso de modelos estadísticos avanzados / ML,Uso,1 a 5 (escala original),54,54,3,17,54,0.314815,0.31,17 de 54 (31 %),,encuesta sin cambios (procesada 14-oct-2026)
+P05,Frecuencia de uso de modelos estadísticos avanzados / ML,Uso,1 a 5 (escala original),54,54,4,7,54,0.12963,0.13,7 de 54 (13 %),,encuesta sin cambios (procesada 14-oct-2026)
+P05,Frecuencia de uso de modelos estadísticos avanzados / ML,Uso,1 a 5 (escala original),54,54,5,9,54,0.166667,0.17,9 de 54 (17 %),,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Habilidad para crear visualizaciones que faciliten la toma de decisiones,21,52,0.403846,0.4,21 de 52 (40 %),TEC_VISUALIZACION,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Rigor estadístico y matemático en los análisis,12,52,0.230769,0.23,12 de 52 (23 %),TEC_ESTADISTICA,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Capacidad para escribir código eficiente y reutilizable (Python/R),12,52,0.230769,0.23,12 de 52 (23 %),TEC_PYTHON; TEC_R,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Capacidad para integrar y limpiar datos de múltiples fuentes,3,52,0.057692,0.06,3 de 52 (6 %),TEC_ETL; TEC_CALIDAD,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Dominio avanzado de consultas y manipulación de datos (SQL),2,52,0.038462,0.04,2 de 52 (4 %),TEC_SQL,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Conocimiento estadístico de la correcta preparación de datos,1,52,0.019231,0.02,1 de 52 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P06,Fortaleza técnica con más impacto en el desempeño,Importancia,Opciones del formulario + 'Otro',52,54,Análisis de los resultados e insights,1,52,0.019231,0.02,1 de 52 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P07,Importancia del Data Storytelling para su rol,Importancia,1 a 5 (escala original),54,54,1,2,54,0.037037,0.04,2 de 54 (4 %),,encuesta sin cambios (procesada 14-oct-2026)
+P07,Importancia del Data Storytelling para su rol,Importancia,1 a 5 (escala original),54,54,2,1,54,0.018519,0.02,1 de 54 (2 %),,encuesta sin cambios (procesada 14-oct-2026)
+P07,Importancia del Data Storytelling para su rol,Importancia,1 a 5 (escala original),54,54,3,8,54,0.148148,0.15,8 de 54 (15 %),,encuesta sin cambios (procesada 14-oct-2026)
+P07,Importancia del Data Storytelling para su rol,Importancia,1 a 5 (escala original),54,54,4,15,54,0.277778,0.28,15 de 54 (28 %),,encuesta sin cambios (procesada 14-oct-2026)
+P07,Importancia del Data Storytelling para su rol,Importancia,1 a 5 (escala original),54,54,5,28,54,0.518519,0.52,28 de 54 (52 %),,encuesta sin cambios (procesada 14-oct-2026)
+P08,Habilidad blanda más difícil de encontrar,Dificultad,Opciones del formulario,54,54,Comunicación efectiva con áreas no técnicas,29,54,0.537037,0.54,29 de 54 (54 %),TRA_NO_TECNICO,encuesta sin cambios (procesada 14-oct-2026)
+P08,Habilidad blanda más difícil de encontrar,Dificultad,Opciones del formulario,54,54,Colaboración y Adaptabilidad,12,54,0.222222,0.22,12 de 54 (22 %),TRA_COLAB_AREAS; TRA_ADAPTABILIDAD,encuesta sin cambios (procesada 14-oct-2026)
+P08,Habilidad blanda más difícil de encontrar,Dificultad,Opciones del formulario,54,54,Pensamiento crítico,8,54,0.148148,0.15,8 de 54 (15 %),TRA_PENS_CRITICO,encuesta sin cambios (procesada 14-oct-2026)
+P08,Habilidad blanda más difícil de encontrar,Dificultad,Opciones del formulario,54,54,Resolución de problemas,3,54,0.055556,0.06,3 de 54 (6 %),TRA_PROBLEMAS,encuesta sin cambios (procesada 14-oct-2026)
+P08,Habilidad blanda más difícil de encontrar,Dificultad,Opciones del formulario,54,54,Autoaprendizaje,2,54,0.037037,0.04,2 de 54 (4 %),TRA_APRENDIZAJE,encuesta sin cambios (procesada 14-oct-2026)
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,2,1,54,0.018519,0.02,1 de 54 (2 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,3,10,54,0.185185,0.19,10 de 54 (19 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,4,7,54,0.12963,0.13,7 de 54 (13 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,5,7,54,0.12963,0.13,7 de 54 (13 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,6,11,54,0.203704,0.2,11 de 54 (20 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,7,3,54,0.055556,0.06,3 de 54 (6 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P09,Alineación de su formación académica con lo que necesita,Importancia (alineación),Valores observados 1 a 8 (escala original; verificar rango en el formulario),54,54,8,15,54,0.277778,0.28,15 de 54 (28 %),,pendiente: escala por verificar; no se usa en las conclusiones
+P10,Asignatura obligatoria que agregaría,Importancia (abierta),Texto libre,45,54,"(respuesta abierta: ver pestaña Encuestas, sin codificar)",45,45,1.0,,45 de 45,,respuesta abierta sin codificar
+P11,¿El inglés es indispensable para su rol?,Uso,"Sí diariamente / Parcialmente, lectura técnica / No, 100 % español",53,54,"Parcialmente, solo para lectura técnica",27,53,0.509434,0.51,27 de 53 (51 %),ING_LECTURA,encuesta sin cambios (procesada 14-oct-2026)
+P11,¿El inglés es indispensable para su rol?,Uso,"Sí diariamente / Parcialmente, lectura técnica / No, 100 % español",53,54,"Sí, lo uso diariamente",20,53,0.377358,0.38,20 de 53 (38 %),ING_COMUNICACION; ING_LECTURA,encuesta sin cambios (procesada 14-oct-2026)
+P11,¿El inglés es indispensable para su rol?,Uso,"Sí diariamente / Parcialmente, lectura técnica / No, 100 % español",53,54,"No, trabajo 100% en español",6,53,0.113208,0.11,6 de 53 (11 %),,encuesta sin cambios (procesada 14-oct-2026)

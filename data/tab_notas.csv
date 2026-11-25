@@ -1,0 +1,31 @@
+campo,contenido
+titulo,UNIR Dashboard – Datos (PRELIMINAR)
+aviso,PRELIMINAR: cifras sujetas a validación oficial. Deben aparecer de forma visible en el dashboard. No usar estas cifras como conclusiones definitivas hasta que corran el clasificador y el juez oficiales (hace falta recargar créditos de Anthropic).
+fecha_de_esta_hoja,24 de noviembre de 2026 (America/Bogota)
+fecha_de_los_datos,Relectura completa del 30 de octubre de 2026; encuesta procesada el 14 de octubre de 2026 (sin cambios el 30-oct).
+fuente_principal,"Hoja UNIR_resultados_legible_v9 (id 1EhnGcrOQw8YkHxmpNxSKZWKp33LWY4Ub8bbQ5pALHWA), carpeta «UNIR - Proyecto Analítica (Oct 2026)», subcarpeta «03 Resultados (Sheets)»."
+pestanas_fuente,Relectura 42 variables (3.360 filas = 29 programas y 51 ofertas × 42 variables; 3.360 de 3.360 citas verificadas); Comparación 42 variables; Resumen encuestas; Fe de erratas; Leeme.
+cobertura_ofertas,"Aviso completo recuperado en 51 de 75 ofertas. Las 24 restantes ya no están disponibles (pestaña «Ofertas no disponibles» de la v9). N de ofertas en este dashboard = 51, no 75."
+cobertura_planes,29 planes de estudio. La consulta a programas (WhatsApp) se informa por separado y no se mezcla con el documento del programa.
+cobertura_encuesta,"54 respuestas del formulario «Encuesta», procesadas el 14-oct-2026, sin IA. Las cifras de la encuesta no cambiaron el 30-oct."
+definicion_explicita,Explícita = nivel 2 o 3. Aplicada = nivel 3. Parcial = nivel 1. Sin mención = nivel 0 propuesto (pendiente de confirmación humana). Vacío no se usa como 0.
+niveles,"0 Sin evidencia · 1 Mención parcial · 2 Mención explícita · 3 Explícita con aplicación · N/A No evaluable. En esta relectura, los niveles observados son solo 0, 1, 2 y 3."
+presencia_explicita,"En la pestaña Detalle, presencia_explicita = 1 si el nivel del documento o aviso es 2 o 3; si no, 0. presencia_mencion = 1 si el nivel es 1, 2 o 3."
+medida_principal_del_modulo_comparacion,"La comparación ofertas vs planes debe usar, por defecto, medida = explicita (nivel 2–3). Las otras medidas están en la misma pestaña para filtros."
+planes_con_consulta,"Para «Planes de estudio (con consulta)» la hoja v9 solo publica la medida explícita. No se inventaron aplicada, parcial ni sin mención para esa variante."
+nombres_de_variables,"Tres etiquetas de inglés se estandarizaron a los nombres de «Comparación 42 variables»: Curso → Curso de inglés; Requisito de ingreso o grado → Requisito de inglés (ingreso o grado); Resultado de aprendizaje → Resultado de aprendizaje (inglés). Los códigos (ING_CURSO, ING_REQUISITO, ING_RESULTADO) no cambian."
+citas,"cita_corta es el fragmento literal verificado, recortado a unos 220 caracteres para el dashboard. La cita completa está en la pestaña «Relectura 42 variables» de la hoja v9."
+metodologia_relectura,"El 30-oct se releyeron las 42 variables en el documento completo de los 29 programas (consulta aparte) y en los 51 avisos completos, con cita literal verificada. Es lectura preliminar: mezcló búsqueda de sinónimos con revisión en lenguaje natural de las variables ambiguas. Pendiente de validación con el clasificador (Claude Sonnet 5.5) y el juez (Claude Opus 5.5) oficiales."
+error_de_insumo_corregido,"El pipeline del 21-oct leyó los «Requisitos resumidos» de las ofertas (74–130 caracteres), no el aviso completo, y mezcló la consulta por WhatsApp con el documento del programa. Esas columnas antiguas de la v9 (Ofertas N=75 y «Resumen por variable») no deben usarse para conclusiones."
+pendiente_clasificador_juez,"Falta la validación oficial con clasificador y juez sobre el texto completo (51 ofertas, 29 currículos, documentos y consulta separados, 42 variables). También falta volver a juzgar «Toma de decisiones» nivel 3 (frase declarativa del perfil de egreso = máximo nivel 2, ya aplicada en la relectura)."
+pendiente_P09,P09 (alineación de la formación): la escala está por verificar (valores observados 1 a 8). No se usa en las conclusiones. Las filas están en Encuesta con estado pendiente.
+pendiente_P04,"P04 (herramientas más usadas, elegir 3): falta la regla para respuestas con un número de opciones distinto de 3. Las filas están en Encuesta con estado pendiente."
+pendiente_proyecto_final,Proyecto final: 15 de 29 en documentos; 19 de 29 con la consulta. Sin verificación humana.
+toma_de_decisiones,Variable inestable (el juez coincidió en 9 de 24 en la ronda anterior). Relectura: explícita en 20 de 29 planes y 35 de 51 ofertas. No se afirma como conclusión hasta el re-juzgamiento.
+juez_acuerdo,"El acuerdo previo del juez (91,6 %; kappa 0,946) mide consistencia entre dos modelos, no exactitud."
+transversales_planes,"Habilidades transversales en currículos, nivel más alto por programa, solo documentos: 18 de 29 sin «toma de decisiones» (aplicada 14); 23 de 29 con ella. Fuente: pestaña «Currículos dimensiones» y Fe de erratas de la v9. No está desglosado por variable en la pestaña Comparación (sí lo está cada variable transversal)."
+ingles_ofertas,"7 de 51 ofertas mencionan inglés (V18, V30, V42, V46 deseable, V56, V70, V74). V12 dice expresamente que NO lo requiere (nivel 0). Fuente: pestaña «Inglés ofertas» y Fe de erratas."
+grupos_combinados,Algunas cifras agrupadas (p. ej. Power BI/Tableau/Looker 2 de 29 en documentos; comunicar o presentar 14 de 51 y 6 de 29; trabajo en equipo/colaboración 17 de 51) están en Fe de erratas y en «Ofertas 51 por grupo». No se recalcularon uniones en esta hoja para no mezclar reglas de agrupación. El dashboard compara las 42 variables una a una.
+encuesta_P10,P10 es respuesta abierta sin codificar (45 de 54). No hay distribución por opción.
+permisos,Esta hoja se creó como fuente del dashboard. No se modificaron permisos de la carpeta ni de la v9. El dashboard no debe compartirse con nadie hasta que Sophie lo vea y lo autorice.
+no_usar,"No usar las columnas «Ofertas: …» con N=75 de «Resumen por variable», ni conclusiones del 21-oct que contradigan la relectura del 30-oct."
