@@ -1,7 +1,7 @@
+"""UNIR · Competencias en analítica (PRELIMINAR) — diseño compacto, una pantalla por pestaña."""
 from __future__ import annotations
 
 import base64
-import html
 import io
 from pathlib import Path
 
@@ -10,9 +10,9 @@ import plotly.graph_objects as go
 import streamlit as st
 from PIL import Image
 
-BASE_DIR = Path(__file__).parent
-DATA_DIR = BASE_DIR / "data"
-ASSETS_DIR = BASE_DIR / "assets"
+BASE = Path(__file__).parent
+DATA = BASE / "data"
+ASSETS = BASE / "assets"
 
 st.set_page_config(
     page_title="UNIR · Competencias en analítica (PRELIMINAR)",
@@ -21,1411 +21,492 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ---------------------------------------------------------------------------
-# Palette & Constants
-# ---------------------------------------------------------------------------
-PRIMARY_NAVY = "#1F4E79"
-PLANES_BLUE = "#8FB3D1"
-CONSULTA_TAUPE = "#A88B73"
-TEXT_DARK = "#1A2332"
-TEXT_MUTED = "#475569"
-BORDER_SUBTLE = "#E2E8F0"
-BG_SUBTLE = "#F8FAFC"
+# ---------------------------------------------------------------- paleta
+PURPLE = "#5B4FD9"   # Ofertas
+BLUE = "#3B9FE0"     # Planes (solo documentos)
+GREEN = "#2FB58A"    # Planes (con consulta) / positivo
+GREY = "#D6DAE3"
+INK = "#1F2937"
+MUTED = "#6B7280"
+FONT = "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif"
 
-COLOR_MAP_FUENTE = {
-    "Ofertas": PRIMARY_NAVY,
-    "Planes de estudio (solo documentos)": PLANES_BLUE,
-    "Planes de estudio (con consulta)": CONSULTA_TAUPE,
-}
+F_OF = "Ofertas"
+F_PL = "Planes de estudio (solo documentos)"
+F_PC = "Planes de estudio (con consulta)"
+FUENTE_COLOR = {F_OF: PURPLE, F_PL: BLUE, F_PC: GREEN}
+FUENTE_CORTA = {F_OF: "Ofertas", F_PL: "Planes (documentos)", F_PC: "Planes (con consulta)"}
 
-MEDIDA_LABELS = {
+MEDIDAS = {
     "explicita": "Explícita (nivel 2–3)",
     "aplicada": "Aplicada (nivel 3)",
     "parcial": "Parcial (nivel 1)",
     "sin_mencion": "Sin mención (nivel 0)",
 }
-
-NIVEL_META = [
-    (3, "3 · Explícita aplicada", "#1F4E79", "#FFFFFF"),
-    (2, "2 · Explícita", "#5B8FA8", "#FFFFFF"),
-    (1, "1 · Parcial", "#F2C166", "#1A2332"),
-    (0, "0 · Sin mención (propuesto)", "#CBD5E1", "#1E293B"),
+NIVELES = [  # nivel, etiqueta, color
+    (3, "3 · Explícita aplicada", PURPLE),
+    (2, "2 · Explícita", "#8F86F0"),
+    (1, "1 · Parcial", BLUE),
+    (0, "0 · Sin mención", GREY),
 ]
+CATEGORIAS = ["Habilidades técnicas", "Habilidades transversales", "Trabajo en proyectos", "Inglés"]
 
-CATEGORY_ORDER = [
-    "Habilidades técnicas",
-    "Habilidades transversales",
-    "Trabajo en proyectos",
-    "Inglés",
-]
+CORTO = {
+    "Gestión y coordinación de proyectos": "Gestión de proyectos",
+    "Necesidades o requerimientos": "Requerimientos",
+    "Interacción con clientes o interesados": "Clientes e interesados",
+    "Explicar a públicos no técnicos": "Explicar a no técnicos",
+    "Requisito de inglés (ingreso o grado)": "Requisito de inglés",
+    "Resultado de aprendizaje (inglés)": "Resultado (inglés)",
+    "Uso oral o escrito del inglés": "Inglés oral/escrito",
+    "Extracción y transformación": "Extracción (ETL)",
+    "Visualización de datos": "Visualización",
+    "Aprendizaje automático": "Aprend. automático",
+    "Colaboración entre áreas": "Colaboración áreas",
+    "Presentación de resultados": "Presentar resultados",
+    "Lectura técnica en inglés": "Lectura en inglés",
+}
 
-# ---------------------------------------------------------------------------
-# Custom CSS
-# ---------------------------------------------------------------------------
+
+def corto(v: str) -> str:
+    return CORTO.get(v, v)
+
+
+# ---------------------------------------------------------------- CSS
 st.markdown(
     """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+html, body, .stApp, [class*="css"] { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; }
+.stApp { background: #F4F5F8; }
+#MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"],
+[data-testid="stStatusWidget"], [data-testid="stDeployButton"], .stDeployButton,
+header[data-testid="stHeader"] { display: none !important; }
+.block-container { padding: 0.9rem 2rem 0.6rem 2rem !important; max-width: 1440px !important; }
+[data-testid="stVerticalBlock"] { gap: 0.6rem; }
+[data-testid="stHorizontalBlock"] { gap: 0.9rem; }
 
-html, body, [class*="css"], .stApp {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    color: #1A2332;
-    background-color: #FFFFFF;
+/* tarjetas */
+[class*="st-key-card"] {
+  background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px;
+  padding: 0.75rem 0.95rem 1.0rem 0.95rem !important;
+  box-shadow: 0 1px 2px rgba(17,24,39,0.04);
 }
+[class*="st-key-card"] [data-testid="stVerticalBlock"] { gap: 0.35rem; }
+.card-title { font-size: 0.86rem; font-weight: 600; color: #374151; margin: 0; }
+.card-sub { font-size: 0.78rem !important; color: #6B7280; margin: 0 0 0.1rem 0; }
 
-/* Hide Streamlit chrome */
-#MainMenu {visibility: hidden !important;}
-footer {visibility: hidden !important;}
-[data-testid="stToolbar"] {display: none !important;}
-[data-testid="stDeployButton"] {display: none !important;}
-.stDeployButton {display: none !important;}
-[data-testid="stDecoration"] {display: none !important;}
-[data-testid="stStatusWidget"] {display: none !important;}
-header[data-testid="stHeader"] {
-    height: 0 !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-    background: transparent !important;
-}
+/* cabecera */
+.hdr { display:flex; align-items:center; gap:0.9rem; }
+.hdr img { height: 30px; }
+.hdr .sep { width:1px; height:28px; background:#D1D5DB; }
+.hdr h1 { font-size: 1.28rem; font-weight: 700; color:#111827; margin:0; padding:0; line-height:1.2; }
+.pill { display:inline-block; background:#FFF3CD; color:#7A4B00; border:1px solid #F5D77A;
+  font-size:0.74rem; font-weight:700; letter-spacing:0.03em; padding:0.18rem 0.6rem; border-radius:999px; white-space:nowrap; }
+.pill-sub { font-size:0.76rem; color:#6B7280; white-space:nowrap; }
 
-/* Main container spacing */
-.block-container {
-    padding-top: 2rem !important;
-    padding-bottom: 3.5rem !important;
-    padding-left: 3rem !important;
-    padding-right: 3rem !important;
-    max-width: 1380px !important;
-}
+/* tabs */
+[data-baseweb="tab-list"] { gap: 1.6rem; border-bottom: 1px solid #E5E7EB; }
+[data-baseweb="tab"] { font-size: 0.95rem !important; font-weight: 600 !important; padding: 0.35rem 0.1rem !important; background: transparent !important; }
+[data-baseweb="tab"][aria-selected="true"] { color: #5B4FD9 !important; }
+[data-baseweb="tab-highlight"] { background-color: #5B4FD9 !important; }
+[data-testid="stTabs"] [data-baseweb="tab-panel"] { padding-top: 0.55rem !important; }
 
-@media (max-width: 768px) {
-    .block-container {
-        padding-left: 1.25rem !important;
-        padding-right: 1.25rem !important;
-    }
-}
+/* sección */
+.sec-h { font-size: 1.05rem; font-weight: 700; color:#111827; margin: 0; }
+.sec-i { font-size: 0.88rem; color:#4B5563; margin: 0.1rem 0 0.35rem 0; }
 
-/* Header */
-.app-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    padding-bottom: 1.15rem;
-    margin-bottom: 1.15rem;
-    border-bottom: 1px solid #E2E8F0;
-}
-.app-logo-wrap {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    padding-right: 1.5rem;
-    border-right: 1px solid #E2E8F0;
-}
-.app-logo-wrap img {
-    height: 54px;
-    width: auto;
-    display: block;
-}
-.app-title-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-.app-eyebrow {
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #1F4E79;
-}
-.app-title {
-    font-size: 1.65rem;
-    font-weight: 700;
-    line-height: 1.25;
-    color: #1A2332;
-    margin: 0;
-}
+/* KPI */
+.kpi { background:#FFF; border:1px solid #E5E7EB; border-radius:12px; padding:0.6rem 0.95rem; }
+.kpi .l { font-size:0.8rem; color:#6B7280; font-weight:500; }
+.kpi .v { font-size:1.6rem; font-weight:700; color:#111827; line-height:1.15; }
+.kpi .n { font-size:0.74rem; color:#9CA3AF; }
 
-/* Preliminary banner */
-.prelim-banner {
-    background-color: #FFF3CD;
-    border: 1px solid #F6D87E;
-    border-left: 5px solid #B45309;
-    border-radius: 8px;
-    padding: 0.85rem 1.15rem;
-    margin-bottom: 1.35rem;
-    color: #4A3200;
-}
-.prelim-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #4A3200;
-    margin-bottom: 0.2rem;
-}
-.prelim-sub {
-    font-size: 0.9rem;
-    line-height: 1.45;
-    color: #5C4008;
-}
+/* número grande */
+.big { font-size: 2.6rem; font-weight: 700; color: #5B4FD9; line-height: 1.05; }
+.big-l { font-size: 1.0rem; font-weight: 600; color:#111827; }
+.row2 { display:flex; justify-content:space-between; font-size:0.84rem; color:#374151; margin-top:0.2rem; }
+.dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:0.35rem; }
+.bar { height:9px; background:#EEF0F4; border-radius:999px; overflow:hidden; margin:0.2rem 0 0.45rem 0; }
+.bar > div { height:100%; border-radius:999px; }
+.flag { font-size:0.82rem; color:#374151; padding:0.35rem 0; border-top:1px solid #F1F2F5; }
+.flag:first-of-type { border-top:none; }
+.tag { display:inline-block; font-size:0.68rem; font-weight:700; padding:0.08rem 0.42rem; border-radius:5px; margin-right:0.35rem; }
+.tag.p { background:#FFF3CD; color:#7A4B00; }
+.tag.o { background:#EEF0F4; color:#374151; }
+.legend span { display:inline-flex; align-items:center; gap:0.3rem; margin-right:0.8rem; font-size:0.78rem; color:#374151; }
+.legend i { width:10px; height:10px; border-radius:3px; display:inline-block; }
+.foot { font-size:0.74rem; color:#9CA3AF; margin-top:0.1rem; }
 
-/* KPI grid */
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.6rem;
-}
-@media (max-width: 960px) {
-    .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-.kpi-card {
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-top: 3px solid #1F4E79;
-    border-radius: 10px;
-    padding: 1rem 1.15rem;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-}
-.kpi-value {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.15;
-    color: #1F4E79;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 0.25rem;
-}
-.kpi-label {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #1A2332;
-    margin-bottom: 0.2rem;
-}
-.kpi-note {
-    font-size: 0.84rem;
-    color: #475569;
-    line-height: 1.35;
-}
-
-/* Tabs */
-[data-baseweb="tab-list"] {
-    gap: 2rem;
-    border-bottom: 2px solid #E2E8F0;
-    margin-bottom: 1.25rem;
-}
-[data-baseweb="tab"] {
-    font-size: 1.02rem !important;
-    font-weight: 600 !important;
-    color: #475569 !important;
-    padding: 0.65rem 0.25rem !important;
-    background: transparent !important;
-}
-[data-baseweb="tab"][aria-selected="true"] {
-    color: #1F4E79 !important;
-}
-[data-baseweb="tab-highlight"] {
-    background-color: #1F4E79 !important;
-    height: 3px !important;
-}
-
-/* Section headings */
-.module-question {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #1A2332;
-    line-height: 1.4;
-    margin: 0.15rem 0 0.45rem 0;
-}
-.def-strip {
-    font-size: 0.88rem;
-    color: #475569;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    padding: 0.6rem 0.95rem;
-    margin-bottom: 1rem;
-    line-height: 1.45;
-}
-.chart-heading {
-    font-size: 1.06rem;
-    font-weight: 700;
-    color: #1A2332;
-    margin: 1.25rem 0 0.2rem 0;
-}
-.chart-sub {
-    font-size: 0.89rem;
-    color: #475569;
-    margin-bottom: 0.65rem;
-    line-height: 1.45;
-}
-
-/* Callouts */
-.callout-warn {
-    background: #FFFBEB;
-    border: 1px solid #FDE68A;
-    border-left: 4px solid #D97706;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-    color: #4A3200;
-    margin: 0.75rem 0 1rem 0;
-    line-height: 1.45;
-}
-.callout-info {
-    background: #F1F5F9;
-    border: 1px solid #CBD5E1;
-    border-left: 4px solid #1F4E79;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-    color: #1E293B;
-    margin: 0.75rem 0 1rem 0;
-    line-height: 1.45;
-}
-
-/* Survey status cards */
-.survey-flags-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.85rem;
-    margin: 0.75rem 0 1.15rem 0;
-}
-@media (max-width: 900px) {
-    .survey-flags-grid { grid-template-columns: 1fr; }
-}
-.flag-card {
-    background: #FFFBEB;
-    border: 1px solid #FDE68A;
-    border-radius: 8px;
-    padding: 0.75rem 0.95rem;
-    font-size: 0.88rem;
-    color: #4A3200;
-    line-height: 1.4;
-}
-.flag-card.neutral {
-    background: #F8FAFC;
-    border-color: #CBD5E1;
-    color: #1E293B;
-}
-.flag-badge {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    background: #FDE68A;
-    color: #78350F;
-    margin-bottom: 0.35rem;
-}
-.flag-badge.neutral {
-    background: #E2E8F0;
-    color: #334155;
-}
-
-/* Detail HTML Table */
-.detail-table-wrap {
-    border: 1px solid #E2E8F0;
-    border-radius: 10px;
-    overflow-x: auto;
-    background: #FFFFFF;
-    margin-top: 0.5rem;
-}
-table.detail-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-    line-height: 1.45;
-}
-table.detail-table thead th {
-    background: #F8FAFC;
-    color: #1A2332;
-    font-weight: 600;
-    text-align: left;
-    padding: 0.7rem 0.8rem;
-    border-bottom: 1px solid #CBD5E1;
-    white-space: nowrap;
-}
-table.detail-table tbody td {
-    padding: 0.65rem 0.8rem;
-    border-bottom: 1px solid #EEF2F6;
-    vertical-align: top;
-    color: #1E293B;
-}
-table.detail-table tbody tr:last-child td {
-    border-bottom: none;
-}
-table.detail-table tbody tr:hover {
-    background: #F8FAFC;
-}
-.lvl-pill {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    white-space: nowrap;
-}
-.lvl-3 { background: #1F4E79; color: #FFFFFF; }
-.lvl-2 { background: #5B8FA8; color: #FFFFFF; }
-.lvl-1 { background: #FEF3C7; color: #78350F; border: 1px solid #FDE68A; }
-.lvl-0 { background: #F1F5F9; color: #475569; }
-
-/* Multiselect tags */
-[data-baseweb="tag"] {
-    max-width: 100% !important;
-}
-[data-baseweb="tag"] span {
-    max-width: 100% !important;
-}
-
-/* Filter container polish */
-[data-testid="stVerticalBlockBorderWrapper"] {
-    background-color: #F8FAFC;
-    border-color: #E2E8F0 !important;
-    border-radius: 10px !important;
-}
-
-/* Footer */
-.footer-box {
-    margin-top: 2.5rem;
-    padding: 1.15rem 1.35rem;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 10px;
-    font-size: 0.88rem;
-    color: #475569;
-    line-height: 1.55;
-}
-.footer-box strong {
-    color: #1A2332;
-}
+/* widgets compactos */
+[data-testid="stSelectbox"] label p, [data-testid="stMultiSelect"] label p { font-size: 0.78rem !important; color:#6B7280 !important; }
+[data-baseweb="select"] > div { min-height: 34px !important; font-size: 0.88rem; }
+[data-testid="stExpander"] summary p { font-size: 0.85rem; }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 
-# ---------------------------------------------------------------------------
-# Data & Asset Loaders
-# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------- datos
 @st.cache_data
-def load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    comp = pd.read_csv(DATA_DIR / "tab_comparacion.csv")
-    det = pd.read_csv(DATA_DIR / "tab_detalle.csv")
-    enc = pd.read_csv(DATA_DIR / "tab_encuesta.csv")
-    notas = pd.read_csv(DATA_DIR / "tab_notas.csv")
-    return comp, det, enc, notas
+def load():
+    return (
+        pd.read_csv(DATA / "tab_comparacion.csv"),
+        pd.read_csv(DATA / "tab_detalle.csv"),
+        pd.read_csv(DATA / "tab_encuesta.csv"),
+        pd.read_csv(DATA / "tab_notas.csv"),
+    )
 
 
 @st.cache_data
-def load_logo_b64() -> str:
-    img = Image.open(ASSETS_DIR / "unir_logo.png").convert("RGBA")
-    bbox = img.getbbox()
-    if bbox:
-        pad = 6
-        x0 = max(0, bbox[0] - pad)
-        y0 = max(0, bbox[1] - pad)
-        x1 = min(img.width, bbox[2] + pad)
-        y1 = min(img.height, bbox[3] + pad)
-        img = img.crop((x0, y0, x1, y1))
+def logo_b64() -> str:
+    img = Image.open(ASSETS / "unir_logo.png").convert("RGBA")
+    bb = img.getbbox()
+    if bb:
+        img = img.crop(bb)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
-    return base64.b64encode(buf.getvalue()).decode("ascii")
+    return base64.b64encode(buf.getvalue()).decode()
 
 
-comp_df, det_df, enc_df, notas_df = load_data()
-logo_b64 = load_logo_b64()
+comp, det, enc, notas = load()
+N_OF = int(comp.loc[comp.fuente == F_OF, "N"].max())
+N_PL = int(comp.loc[comp.fuente == F_PL, "N"].max())
+N_ENC = int(enc["N_formulario"].max())
+N_VAR = int(comp["codigo"].nunique())
+N_CITAS = len(det)
 
-# ---------------------------------------------------------------------------
-# Header, Preliminary Banner & 4 KPI Cards
-# ---------------------------------------------------------------------------
-st.markdown(
-    f"""
-<div class="app-header">
-    <div class="app-logo-wrap">
-        <img src="data:image/png;base64,{logo_b64}" alt="Logotipo UNIR" />
-    </div>
-    <div class="app-title-wrap">
-        <div class="app-eyebrow">Proyecto Analítica · Relectura preliminar 30-oct-2026</div>
-        <h1 class="app-title">Competencias en analítica: mercado vs. planes de estudio UNIR</h1>
-    </div>
-</div>
 
-<div class="prelim-banner">
-    <div class="prelim-title">PRELIMINAR · Cifras sujetas a validación oficial</div>
-    <div class="prelim-sub">
-        Relectura del 30-oct-2026 sobre 51 avisos completos y 29 planes (consulta aparte).
-        Pendiente del clasificador y el juez oficiales. N de ofertas = 51, no 75.
-        No usar las columnas antiguas de la v9 con N=75.
-    </div>
-</div>
-""",
-    unsafe_allow_html=True,
-)
+def pivot(medida: str, categoria: str | None = None) -> pd.DataFrame:
+    d = comp[(comp.medida == medida) & (comp.estado == "preliminar")]
+    if categoria:
+        d = d[d.categoria == categoria]
+    p = d.pivot_table(index=["variable", "categoria"], columns="fuente", values="porcentaje").reset_index()
+    nn = d.pivot_table(index="variable", columns="fuente", values="n_de_N", aggfunc="first")
+    p = p.merge(nn.add_prefix("ndn_"), left_on="variable", right_index=True, how="left")
+    if F_OF in p and F_PL in p:
+        p["brecha"] = (p[F_OF] - p[F_PL]) * 100
+    return p
 
-n_ofertas = int(comp_df.loc[comp_df["fuente"] == "Ofertas", "N"].max())
-n_planes = int(
-    comp_df.loc[comp_df["fuente"] == "Planes de estudio (solo documentos)", "N"].max()
-)
-n_encuesta = int(enc_df["N_formulario"].max())
-n_vars = int(comp_df["codigo"].nunique())
 
-st.markdown(
-    f"""
-<div class="kpi-grid">
-    <div class="kpi-card">
-        <div class="kpi-value">{n_ofertas}</div>
-        <div class="kpi-label">Ofertas analizadas</div>
-        <div class="kpi-note">Avisos completos (de 75 originales; 24 ya no disponibles)</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-value">{n_planes}</div>
-        <div class="kpi-label">Planes de estudio</div>
-        <div class="kpi-note">Documentos curriculares (consulta WhatsApp aparte)</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-value">{n_encuesta}</div>
-        <div class="kpi-label">Respuestas de encuesta</div>
-        <div class="kpi-note">Procesada el 14-oct-2026 (sin cambios el 30-oct)</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-value">{n_vars}</div>
-        <div class="kpi-label">Variables</div>
-        <div class="kpi-note">4 categorías · Todas en estado preliminar</div>
-    </div>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-# ---------------------------------------------------------------------------
-# Two Modules (Tabs)
-# ---------------------------------------------------------------------------
-tab_comp, tab_vis = st.tabs(["Comparación", "Visualización"])
-
-# ===========================================================================
-# TAB 1: COMPARACIÓN
-# ===========================================================================
-with tab_comp:
-    st.markdown(
-        '<div class="module-question">¿En qué variables el mercado (ofertas) pide de forma explícita algo distinto de lo que enseñan los planes de estudio?</div>',
-        unsafe_allow_html=True,
+def base_layout(fig: go.Figure, height: int, **kw) -> go.Figure:
+    fig.update_layout(
+        height=height,
+        margin=kw.pop("margin", dict(l=4, r=12, t=6, b=4)),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family=FONT, size=14, color=INK),
+        hoverlabel=dict(font=dict(family=FONT, size=13)),
+        **kw,
     )
+    return fig
+
+
+def show(fig):
+    st.plotly_chart(fig, use_container_width=True, theme=None, config={"displayModeBar": False})
+
+
+def card_head(title: str, sub: str = ""):
     st.markdown(
-        '<div class="def-strip">'
-        "<strong>Definiciones:</strong> Explícita = nivel 2 o 3 · Aplicada = nivel 3 · "
-        "Parcial = nivel 1 · Sin mención = nivel 0 (propuesto, pendiente de confirmación humana). "
-        "Comparador por defecto para planes: <strong>solo documentos</strong>."
-        "</div>",
+        f'<p class="card-title">{title}</p>' + (f'<p class="card-sub">{sub}</p>' if sub else ""),
         unsafe_allow_html=True,
     )
 
-    with st.container(border=True):
-        c1, c2, c3, c4 = st.columns([1.0, 1.25, 1.05, 2.2])
-        with c1:
-            cat_options = ["Todas las categorías"] + [
-                c for c in CATEGORY_ORDER if c in comp_df["categoria"].unique()
-            ]
-            sel_cat_comp = st.selectbox(
-                "Categoría",
-                options=cat_options,
-                index=0,
-                key="comp_cat",
-            )
-        with c2:
-            if sel_cat_comp == "Todas las categorías":
-                avail_vars = sorted(comp_df["variable"].unique().tolist())
-            else:
-                avail_vars = sorted(
-                    comp_df.loc[comp_df["categoria"] == sel_cat_comp, "variable"]
-                    .unique()
-                    .tolist()
+
+def legend(items):
+    st.markdown(
+        '<div class="legend">' + "".join(f'<span><i style="background:{c}"></i>{t}</span>' for t, c in items) + "</div>",
+        unsafe_allow_html=True,
+    )
+
+
+# ---------------------------------------------------------------- cabecera
+h1, h2 = st.columns([5, 1.25], vertical_alignment="center")
+with h1:
+    st.markdown(
+        f"""<div class="hdr"><img src="data:image/png;base64,{logo_b64()}" alt="UNIR"/><div class="sep"></div>
+        <h1>Competencias en analítica: mercado vs. planes de estudio UNIR</h1>
+        <span class="pill">PRELIMINAR</span>
+        <span class="pill-sub">Cifras sujetas a validación oficial · relectura 30-oct-2026</span></div>""",
+        unsafe_allow_html=True,
+    )
+with h2:
+    with st.popover("Fuentes y notas", use_container_width=True):
+        st.markdown(
+            "**Aviso.** Cifras preliminares: relectura del 30-oct-2026 sobre 51 avisos completos "
+            "(de 75; 24 ya no disponibles) y 29 planes (consulta aparte). Pendiente del clasificador y el juez oficiales. "
+            "N de ofertas = 51, no 75.\n\n"
+            "**Definiciones.** Explícita = nivel 2–3 · Aplicada = 3 · Parcial = 1 · Sin mención = 0 (propuesto).\n\n"
+            "**No se usan** las columnas antiguas con N=75 ni uniones agrupadas recalculadas. "
+            "«Toma de decisiones» es inestable y no se afirma como conclusión. P09 no se usa en conclusiones."
+        )
+        st.dataframe(
+            notas.rename(columns={"campo": "Campo", "contenido": "Contenido"}),
+            hide_index=True, height=260, use_container_width=True,
+        )
+
+t_res, t_comp, t_exp, t_enc = st.tabs(["Resumen", "Comparación", "Explorar", "Encuesta"])
+
+# ================================================================ RESUMEN
+with t_res:
+    p = pivot("explicita")
+    top_pos = p.sort_values("brecha", ascending=False).head(3)
+    top_neg = p.sort_values("brecha").head(2)
+    g = p.loc[p["brecha"].abs().idxmax()]
+
+    insight = (
+        "Las ofertas piden de forma explícita "
+        + ", ".join(f"{corto(r.variable)} (+{r.brecha:.0f} pp)" for r in top_pos.itertuples())
+        + " mucho más que los planes; los planes destacan en "
+        + " y ".join(f"{corto(r.variable).lower()} ({r.brecha:.0f} pp)" for r in top_neg.itertuples())
+        + "."
+    )
+    st.markdown(
+        f'<p class="sec-h">¿Qué pide el mercado frente a lo que enseñan los planes?</p><p class="sec-i">{insight}</p>',
+        unsafe_allow_html=True,
+    )
+
+    k = st.columns(4)
+    kpis = [
+        ("Ofertas analizadas", N_OF, "avisos completos (de 75)"),
+        ("Planes de estudio", N_PL, "solo documentos; consulta aparte"),
+        ("Respuestas de encuesta", N_ENC, "procesada el 14-oct-2026"),
+        ("Variables", N_VAR, "4 categorías · preliminar"),
+    ]
+    for col, (lab, val, note) in zip(k, kpis):
+        col.markdown(f'<div class="kpi"><div class="l">{lab}</div><div class="v">{val}</div><div class="n">{note}</div></div>', unsafe_allow_html=True)
+
+    left, right = st.columns([2.35, 1])
+    with left:
+        with st.container(key="card_res_main"):
+            card_head("Mayores brechas · % con mención explícita (nivel 2–3)",
+                      "8 variables con mayor diferencia entre ofertas y planes (solo documentos)")
+            legend([(f"Ofertas (N={N_OF})", PURPLE), (f"Planes · documentos (N={N_PL})", BLUE)])
+            top = p.reindex(p["brecha"].abs().sort_values(ascending=False).index).head(8)
+            top = top.sort_values("brecha")  # positivo arriba
+            fig = go.Figure()
+            for f, col in [(F_PL, BLUE), (F_OF, PURPLE)]:
+                fig.add_bar(
+                    y=[corto(v) for v in top.variable], x=top[f], name=FUENTE_CORTA[f], orientation="h",
+                    marker_color=col, text=[f"{x*100:.0f}%" for x in top[f]], textposition="outside",
+                    cliponaxis=False, textfont=dict(size=13, color=INK),
+                    customdata=top[f"ndn_{f}"], hovertemplate="%{y}: %{x:.1%} (%{customdata})<extra>" + FUENTE_CORTA[f] + "</extra>",
                 )
-            sel_vars_comp = st.multiselect(
-                "Variable",
-                options=avail_vars,
-                default=[],
-                placeholder="Todas las variables",
-                key="comp_var",
+            base_layout(fig, 336, barmode="group", bargap=0.28, bargroupgap=0.06, showlegend=False,
+                        xaxis=dict(range=[0, 0.9], tickformat=".0%", dtick=0.2, gridcolor="#EEF0F4", tickfont=dict(size=12, color=MUTED), zeroline=False),
+                        yaxis=dict(tickfont=dict(size=13.5), automargin=True))
+            show(fig)
+    with right:
+        with st.container(key="card_res_big"):
+            card_head("Brecha más grande")
+            st.markdown(
+                f"""<div class="big-l">{g.variable}</div>
+                <div class="big">+{g.brecha:.0f} pp</div>
+                <div class="row2"><span><i class="dot" style="background:{PURPLE}"></i>Ofertas</span><b>{g[F_OF]*100:.0f}% · {g[f'ndn_{F_OF}']}</b></div>
+                <div class="bar"><div style="width:{g[F_OF]*100:.1f}%;background:{PURPLE}"></div></div>
+                <div class="row2"><span><i class="dot" style="background:{BLUE}"></i>Planes (documentos)</span><b>{g[F_PL]*100:.0f}% · {g[f'ndn_{F_PL}']}</b></div>
+                <div class="bar"><div style="width:{g[F_PL]*100:.1f}%;background:{BLUE}"></div></div>""",
+                unsafe_allow_html=True,
             )
-        with c3:
-            medida_keys = ["explicita", "aplicada", "parcial", "sin_mencion"]
-            sel_medida = st.selectbox(
-                "Medida",
-                options=medida_keys,
-                index=0,
-                format_func=lambda k: MEDIDA_LABELS[k],
-                key="comp_medida",
+        with st.container(key="card_res_cov"):
+            card_head("Cobertura de los datos")
+            st.markdown(
+                f"""<div class="row2"><span>Avisos completos recuperados</span><b>{N_OF} de 75 ({N_OF/75*100:.0f}%)</b></div>
+                <div class="bar"><div style="width:{N_OF/75*100:.1f}%;background:{GREEN}"></div></div>
+                <div class="row2"><span>Citas verificadas</span><b>{N_CITAS:,} de {N_CITAS:,}</b></div>
+                <div class="bar"><div style="width:100%;background:{GREEN}"></div></div>
+                <div class="row2"><span>Validación oficial (clasificador y juez)</span><b>pendiente</b></div>
+                <div class="bar"><div style="width:0%"></div></div>""".replace(",", "."),
+                unsafe_allow_html=True,
             )
-        with c4:
-            fuente_options = [
-                "Ofertas",
-                "Planes de estudio (solo documentos)",
-                "Planes de estudio (con consulta)",
-            ]
-            sel_fuentes = st.multiselect(
-                "Fuente",
-                options=fuente_options,
-                default=["Ofertas", "Planes de estudio (solo documentos)"],
-                placeholder="Selecciona al menos una fuente",
-                key="comp_fuente",
-            )
+    st.markdown('<p class="foot">Fuente: hoja UNIR_resultados_legible_v9 · relectura 30-oct-2026 · encuesta 14-oct-2026 · '
+                'cifras preliminares, no usar como conclusiones definitivas.</p>', unsafe_allow_html=True)
 
-    if not sel_fuentes:
-        st.warning("Selecciona al menos una fuente en los filtros superiores para ver los resultados.")
+# ================================================================ COMPARACIÓN
+with t_comp:
+    f1, f2, f3, f4 = st.columns([1.3, 1.3, 0.8, 2.6])
+    cat = f1.selectbox("Categoría", ["Todas"] + CATEGORIAS, key="c_cat")
+    med = f2.selectbox("Medida", list(MEDIDAS), format_func=MEDIDAS.get, key="c_med")
+    topn = f3.selectbox("Mostrar", [8, 10, 12], index=1, format_func=lambda n: f"Top {n}", key="c_top")
+    with f4:
+        st.markdown(
+            '<p class="sec-i" style="margin-top:1.55rem;">Planes = solo documentos. '
+            '«Con consulta» solo existe para la medida explícita.</p>', unsafe_allow_html=True)
+
+    pc = pivot(med, None if cat == "Todas" else cat)
+    if pc.empty or "brecha" not in pc:
+        st.info("No hay datos para esta selección.")
     else:
-        if (
-            "Planes de estudio (con consulta)" in sel_fuentes
-            and sel_medida != "explicita"
-        ):
-            st.markdown(
-                '<div class="callout-info">'
-                "<strong>Nota sobre «Planes de estudio (con consulta)»:</strong> la hoja v9 solo publica "
-                "la medida <strong>explícita (nivel 2–3)</strong> para esta variante. No se inventaron "
-                "cifras de aplicada, parcial ni sin mención."
-                "</div>",
-                unsafe_allow_html=True,
-            )
+        sel = pc.reindex(pc["brecha"].abs().sort_values(ascending=False).index).head(topn).sort_values("brecha")
+        ch = max(300, min(360, 30 * len(sel) + 40))
+        a, b = st.columns([1.15, 1])
+        with a:
+            with st.container(key="card_c_gap"):
+                card_head(f"Brecha en puntos porcentuales · {MEDIDAS[med]}",
+                          "% Ofertas − % Planes (solo documentos). Positivo = más en ofertas.")
+                cols = [PURPLE if v >= 0 else BLUE for v in sel.brecha]
+                fig = go.Figure(go.Bar(
+                    y=[corto(v) for v in sel.variable], x=sel.brecha, orientation="h", marker_color=cols,
+                    text=[f"{v:+.0f} pp" for v in sel.brecha], textposition="outside", cliponaxis=False,
+                    textfont=dict(size=13, color=INK), hovertemplate="%{y}: %{x:+.1f} pp<extra></extra>"))
+                lim = max(20, sel.brecha.abs().max() * 1.3)
+                base_layout(fig, ch, showlegend=False,
+                            xaxis=dict(range=[-lim, lim], ticksuffix=" pp", gridcolor="#EEF0F4", zerolinecolor="#9CA3AF",
+                                       tickfont=dict(size=12, color=MUTED)),
+                            yaxis=dict(tickfont=dict(size=13.5), automargin=True))
+                show(fig)
+        with b:
+            with st.container(key="card_c_dot"):
+                srcs = [F_OF, F_PL] + ([F_PC] if med == "explicita" else [])
+                card_head(f"Ofertas vs. planes · {MEDIDAS[med]}", "Porcentaje de cada fuente para las mismas variables")
+                legend([(FUENTE_CORTA[s], FUENTE_COLOR[s]) for s in srcs])
+                fig = go.Figure()
+                ylab = [corto(v) for v in sel.variable]
+                for _, r in sel.iterrows():
+                    vals = [r[s] for s in srcs if pd.notna(r.get(s))]
+                    fig.add_scatter(x=[min(vals), max(vals)], y=[corto(r.variable)] * 2, mode="lines",
+                                    line=dict(color="#D1D5DB", width=3), hoverinfo="skip", showlegend=False)
+                for s in srcs:
+                    fig.add_scatter(
+                        x=sel[s], y=ylab, mode="markers+text" if s != F_PC else "markers", name=FUENTE_CORTA[s],
+                        marker=dict(color=FUENTE_COLOR[s], size=12 if s != F_PC else 9,
+                                    symbol="circle" if s != F_PC else "diamond", line=dict(color="white", width=1.5)),
+                        text=[f"{x*100:.0f}%" for x in sel[s]] if s != F_PC else None,
+                        textposition=["middle right" if r[F_OF] >= r[F_PL] else "middle left" for _, r in sel.iterrows()] if s == F_OF
+                        else ["middle left" if r[F_OF] >= r[F_PL] else "middle right" for _, r in sel.iterrows()],
+                        textfont=dict(size=12.5, color=FUENTE_COLOR[s] if s != F_PL else "#1F6FA8"),
+                        customdata=sel[f"ndn_{s}"],
+                        hovertemplate="%{y}: %{x:.1%} (%{customdata})<extra>" + FUENTE_CORTA[s] + "</extra>")
+                base_layout(fig, ch - 22, showlegend=False,
+                            xaxis=dict(range=[-0.12, 1.0], tickformat=".0%", dtick=0.25, gridcolor="#EEF0F4",
+                                       tickfont=dict(size=12, color=MUTED), zeroline=False),
+                            yaxis=dict(tickfont=dict(size=13.5), automargin=True, showgrid=False))
+                show(fig)
+        ex = pc.reindex(pc["brecha"].abs().sort_values(ascending=False).index).head(topn)
+        with st.expander(f"Ver tabla exacta (n de N) de estas {len(ex)} variables"):
+            t = ex[["variable", "categoria", f"ndn_{F_OF}", f"ndn_{F_PL}", "brecha"]].rename(columns={
+                "variable": "Variable", "categoria": "Categoría", f"ndn_{F_OF}": "Ofertas (n de N)",
+                f"ndn_{F_PL}": "Planes docs (n de N)", "brecha": "Brecha (pp)"})
+            st.dataframe(t, hide_index=True, height=200, use_container_width=True,
+                         column_config={"Brecha (pp)": st.column_config.NumberColumn(format="%+.1f")})
+        if "Toma de decisiones" in set(sel.variable):
+            st.markdown('<p class="foot">«Toma de decisiones»: variable inestable, pendiente de re-juzgamiento; no se afirma como conclusión.</p>',
+                        unsafe_allow_html=True)
 
-        filt_comp = comp_df[
-            (comp_df["medida"] == sel_medida)
-            & (comp_df["fuente"].isin(sel_fuentes))
-            & (comp_df["estado"] == "preliminar")
-        ].copy()
+# ================================================================ EXPLORAR
+with t_exp:
+    e1, e2, e3, e4 = st.columns([1.1, 1.5, 1.4, 2.0])
+    fu = e1.selectbox("Fuente", ["Ofertas", "Planes de estudio"], key="e_fu")
+    ids = sorted(det.loc[det.fuente == fu, "id"].unique())
+    uid = e2.selectbox("Oferta o programa", ["Todas"] + ids, key="e_id",
+                       format_func=lambda x: f"Todas ({len(ids)})" if x == "Todas" else x)
+    ecat = e3.selectbox("Categoría", ["Todas"] + CATEGORIAS, key="e_cat")
+    d = det[det.fuente == fu]
+    if uid != "Todas":
+        d = d[d.id == uid]
+    if ecat != "Todas":
+        d = d[d.categoria == ecat]
+    with e4:
+        n_exp = int(d.presencia_explicita.sum())
+        st.markdown(
+            f'<p class="sec-i" style="margin-top:1.55rem;"><b>{d.id.nunique()}</b> unidad(es) · <b>{d.variable.nunique()}</b> variables · '
+            f'<b>{n_exp}</b> de {len(d)} registros con mención explícita (nivel 2–3).</p>', unsafe_allow_html=True)
 
-        if sel_cat_comp != "Todas las categorías":
-            filt_comp = filt_comp[filt_comp["categoria"] == sel_cat_comp]
-        if sel_vars_comp:
-            filt_comp = filt_comp[filt_comp["variable"].isin(sel_vars_comp)]
-
-        if filt_comp.empty:
-            st.info(
-                "No hay filas disponibles para la combinación de filtros seleccionada."
-            )
-        else:
-            if "Toma de decisiones" in filt_comp["variable"].values:
-                st.markdown(
-                    '<div class="callout-warn">'
-                    "<strong>Nota metodológica sobre «Toma de decisiones»:</strong> variable inestable "
-                    "en la ronda previa (el juez coincidió en 9 de 24) y pendiente de re-juzgamiento "
-                    "oficial. No se debe afirmar como conclusión."
-                    "</div>",
-                    unsafe_allow_html=True,
-                )
-
-            # Determine variable sort order (descending by Ofertas, else first active fuente)
-            active_sources = [f for f in sel_fuentes if f in filt_comp["fuente"].unique()]
-            sort_source = "Ofertas" if "Ofertas" in active_sources else active_sources[0]
-            sort_ref = (
-                filt_comp[filt_comp["fuente"] == sort_source]
-                .sort_values(["porcentaje", "variable"], ascending=[False, True])["variable"]
-                .tolist()
-            )
-            # Include any variable missing from sort_source at the end
-            for v in filt_comp["variable"].unique():
-                if v not in sort_ref:
-                    sort_ref.append(v)
-
-            # For horizontal bars with top-most highest, pass reversed order on y
-            y_order_asc = list(reversed(sort_ref))
-            n_shown_vars = len(sort_ref)
-
-            st.markdown(
-                f'<div class="chart-heading">Comparación pareada por variable · {MEDIDA_LABELS[sel_medida]}</div>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                f'<div class="chart-sub">Mostrando {n_shown_vars} variables · Etiquetas en formato porcentaje redondeado y recuento exacto (n de N).</div>',
-                unsafe_allow_html=True,
-            )
-
-            fig_comp = go.Figure()
-            # Add traces in reverse display order so first source appears at top of each group
-            for fuente_name in reversed(active_sources):
-                sub = (
-                    filt_comp[filt_comp["fuente"] == fuente_name]
-                    .set_index("variable")
-                    .reindex(y_order_asc)
-                    .reset_index()
-                )
-                sub = sub.dropna(subset=["porcentaje"])
-                labels_text = [
-                    f"{round(p * 100):.0f}% ({ndn})"
-                    for p, ndn in zip(sub["porcentaje"], sub["n_de_N"])
-                ]
-                hover_text = [
-                    f"<b>{v}</b><br>{fuente_name}<br>"
-                    f"Porcentaje: {p * 100:.1f}% ({ndn})<br>"
-                    f"Categoría: {cat}<br>Estado: preliminar"
-                    for v, p, ndn, cat in zip(
-                        sub["variable"], sub["porcentaje"], sub["n_de_N"], sub["categoria"]
-                    )
-                ]
-                fig_comp.add_trace(
-                    go.Bar(
-                        y=sub["variable"],
-                        x=sub["porcentaje"],
-                        name=fuente_name,
-                        orientation="h",
-                        marker=dict(
-                            color=COLOR_MAP_FUENTE.get(fuente_name, "#64748B"),
-                            line=dict(width=0),
-                        ),
-                        text=labels_text,
-                        textposition="outside",
-                        cliponaxis=False,
-                        textfont=dict(size=13.5, color=TEXT_DARK),
-                        hovertext=hover_text,
-                        hoverinfo="text",
-                    )
-                )
-
-            row_step = 40 if len(active_sources) <= 2 else 52
-            chart_height = max(380, n_shown_vars * row_step + 110)
-
-            fig_comp.update_layout(
-                barmode="group",
-                bargap=0.22,
-                bargroupgap=0.08,
-                height=chart_height,
-                margin=dict(l=10, r=140, t=64, b=36),
-                plot_bgcolor="#FFFFFF",
-                paper_bgcolor="#FFFFFF",
-                font=dict(
-                    family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-                    size=14,
-                    color=TEXT_DARK,
-                ),
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=1.02,
-                    xanchor="left",
-                    x=0,
-                    traceorder="reversed",
-                    font=dict(size=14, color=TEXT_DARK),
-                ),
-                xaxis=dict(
-                    range=[0, 1.18],
-                    tickformat=".0%",
-                    dtick=0.2,
-                    gridcolor="#EEF2F6",
-                    zerolinecolor="#CBD5E1",
-                    tickfont=dict(size=14, color=TEXT_MUTED),
-                    title=dict(text="Porcentaje sobre total de la fuente", font=dict(size=14, color=TEXT_MUTED)),
-                ),
-                yaxis=dict(
-                    categoryorder="array",
-                    categoryarray=y_order_asc,
-                    tickfont=dict(size=14, color=TEXT_DARK),
-                    automargin=True,
-                ),
-            )
-
-            st.plotly_chart(
-                fig_comp,
-                use_container_width=True,
-                theme=None,
-                config={"displayModeBar": False},
-            )
-
-            # Supporting Table
-            st.markdown(
-                '<div class="chart-heading">Tabla de apoyo (valores exactos)</div>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                '<div class="chart-sub">Lectura exacta de n de N y porcentaje con un decimal, sin aproximar.</div>',
-                unsafe_allow_html=True,
-            )
-
-            rank_map = {v: i for i, v in enumerate(sort_ref)}
-            fuente_rank = {f: i for i, f in enumerate(fuente_options)}
-            tbl_comp = filt_comp.copy()
-            tbl_comp["_vrank"] = tbl_comp["variable"].map(rank_map)
-            tbl_comp["_frank"] = tbl_comp["fuente"].map(fuente_rank)
-            tbl_comp = tbl_comp.sort_values(["_vrank", "_frank"]).drop(
-                columns=["_vrank", "_frank"]
-            )
-            tbl_comp["Porcentaje (%)"] = (tbl_comp["porcentaje"] * 100).round(1)
-            tbl_display = tbl_comp[
-                ["variable", "categoria", "fuente", "n_de_N", "Porcentaje (%)", "estado"]
-            ].rename(
-                columns={
-                    "variable": "Variable",
-                    "categoria": "Categoría",
-                    "fuente": "Fuente",
-                    "n_de_N": "n de N",
-                    "estado": "Estado",
-                }
-            )
-
+    c1, c2, c3 = st.columns([0.95, 1.15, 1.9])
+    cnt = d.nivel.value_counts().reindex([3, 2, 1, 0], fill_value=0)
+    with c1:
+        with st.container(key="card_e_donut"):
+            card_head("Distribución de niveles", "Registros variable × unidad")
+            fig = go.Figure(go.Pie(
+                labels=[l for _, l, _ in NIVELES], values=[int(cnt[n]) for n, _, _ in NIVELES],
+                marker=dict(colors=[c for _, _, c in NIVELES], line=dict(color="white", width=2)),
+                hole=0.62, sort=False, direction="clockwise", texttemplate="%{percent:.0%}",
+                textfont=dict(size=12.5), insidetextfont=dict(color="white"),
+                hovertemplate="%{label}: %{value} (%{percent})<extra></extra>"))
+            fig.add_annotation(text=f"<b>{(cnt[2]+cnt[3])/max(1,len(d))*100:.0f}%</b><br><span style='font-size:12px;color:{MUTED}'>explícita</span>",
+                               showarrow=False, font=dict(size=22, color=INK))
+            base_layout(fig, 236, showlegend=False, margin=dict(l=4, r=4, t=4, b=4))
+            show(fig)
+            legend([(l, c) for _, l, c in NIVELES])
+    with c2:
+        with st.container(key="card_e_stack"):
+            card_head("Niveles por categoría", "% de registros en cada nivel (100 %)")
+            ct = d.groupby(["categoria", "nivel"]).size().unstack(fill_value=0).reindex(columns=[3, 2, 1, 0], fill_value=0)
+            ct = ct.reindex([c for c in reversed(CATEGORIAS) if c in ct.index])
+            pct = ct.div(ct.sum(axis=1), axis=0)
+            fig = go.Figure()
+            for n, l, c in NIVELES:
+                fig.add_bar(y=[x.replace("Habilidades ", "H. ") for x in pct.index], x=pct[n], name=l, orientation="h",
+                            marker=dict(color=c, line=dict(color="white", width=1)),
+                            text=[f"{v*100:.0f}%" if v >= 0.14 else "" for v in pct[n]], textposition="inside", textangle=0,
+                            insidetextanchor="middle", textfont=dict(size=12, color="white" if n else INK),
+                            customdata=ct[n], hovertemplate="%{y} · " + l + ": %{x:.0%} (%{customdata})<extra></extra>")
+            base_layout(fig, 286, barmode="stack", bargap=0.35, showlegend=False,
+                        xaxis=dict(range=[0, 1], tickformat=".0%", dtick=0.25, gridcolor="#EEF0F4", tickfont=dict(size=12, color=MUTED)),
+                        yaxis=dict(tickfont=dict(size=13), automargin=True))
+            show(fig)
+    with c3:
+        with st.container(key="card_e_tbl"):
+            solo = st.toggle("Solo registros con evidencia (nivel 1–3)", value=True, key="e_solo")
+            tt = d[d.nivel >= 1] if solo else d
+            tt = tt.sort_values(["nivel", "id", "variable"], ascending=[False, True, True])
+            cols = ["id", "variable", "nivel", "cita_corta", "ubicacion"]
+            ren = {"id": "ID", "variable": "Variable", "nivel": "Nivel", "cita_corta": "Cita literal", "ubicacion": "Ubicación"}
+            if fu == "Planes de estudio":
+                cols += ["nivel_con_consulta", "cita_consulta_corta"]
+                ren.update({"nivel_con_consulta": "Nivel c/ consulta", "cita_consulta_corta": "Cita consulta"})
             st.dataframe(
-                tbl_display,
-                use_container_width=True,
-                hide_index=True,
-                height=min(460, 42 + len(tbl_display) * 35),
+                tt[cols].rename(columns=ren), hide_index=True, height=262, use_container_width=True,
                 column_config={
-                    "Variable": st.column_config.TextColumn("Variable", width="medium"),
-                    "Categoría": st.column_config.TextColumn("Categoría", width="medium"),
-                    "Fuente": st.column_config.TextColumn("Fuente", width="medium"),
-                    "n de N": st.column_config.TextColumn("n de N", width="small"),
-                    "Porcentaje (%)": st.column_config.NumberColumn(
-                        "Porcentaje", format="%.1f%%", width="small"
-                    ),
-                    "Estado": st.column_config.TextColumn("Estado", width="small"),
+                    "ID": st.column_config.TextColumn(width="small"),
+                    "Variable": st.column_config.TextColumn(width="small"),
+                    "Nivel": st.column_config.NumberColumn(width="small", format="%d"),
+                    "Cita literal": st.column_config.TextColumn(width="large"),
+                    "Nivel c/ consulta": st.column_config.NumberColumn(format="%d"),
                 },
             )
+            st.markdown(f'<p class="card-sub">{len(tt):,} registros · desplaza dentro de la tabla · citas recortadas a ~220 caracteres</p>'.replace(",", "."),
+                        unsafe_allow_html=True)
 
-            # Optional Brecha view (Ofertas vs Planes solo documentos)
-            if (
-                "Ofertas" in active_sources
-                and "Planes de estudio (solo documentos)" in active_sources
-            ):
-                piv = filt_comp[
-                    filt_comp["fuente"].isin(
-                        ["Ofertas", "Planes de estudio (solo documentos)"]
-                    )
-                ].pivot(index="variable", columns="fuente", values="porcentaje")
-                if (
-                    "Ofertas" in piv.columns
-                    and "Planes de estudio (solo documentos)" in piv.columns
-                ):
-                    piv = piv.dropna().copy()
-                    piv["brecha_pp"] = (
-                        piv["Ofertas"] - piv["Planes de estudio (solo documentos)"]
-                    ) * 100.0
-                    piv = piv.sort_values("brecha_pp", ascending=True).reset_index()
-
-                    st.markdown(
-                        f'<div class="chart-heading">Brecha simple en puntos porcentuales (Ofertas − Planes solo documentos) · {MEDIDA_LABELS[sel_medida]}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    st.markdown(
-                        '<div class="chart-sub">'
-                        "Diferencia calculada directamente entre los porcentajes de la tabla superior "
-                        "(% Ofertas − % Planes solo documentos). Valores positivos (+ pp) indican mayor "
-                        "presencia en ofertas; negativos (− pp), mayor presencia en planes. "
-                        "No se recalculan uniones agrupadas."
-                        "</div>",
-                        unsafe_allow_html=True,
-                    )
-
-                    bar_colors = [
-                        PRIMARY_NAVY if val >= 0 else PLANES_BLUE
-                        for val in piv["brecha_pp"]
-                    ]
-                    bar_labels = [
-                        f"{val:+.1f} pp" for val in piv["brecha_pp"]
-                    ]
-                    hover_brecha = [
-                        f"<b>{v}</b><br>Ofertas: {o*100:.1f}%<br>"
-                        f"Planes (solo documentos): {pl*100:.1f}%<br>"
-                        f"Brecha: {b:+.1f} pp"
-                        for v, o, pl, b in zip(
-                            piv["variable"],
-                            piv["Ofertas"],
-                            piv["Planes de estudio (solo documentos)"],
-                            piv["brecha_pp"],
-                        )
-                    ]
-
-                    fig_brecha = go.Figure(
-                        go.Bar(
-                            y=piv["variable"],
-                            x=piv["brecha_pp"],
-                            orientation="h",
-                            marker=dict(color=bar_colors),
-                            text=bar_labels,
-                            textposition="outside",
-                            cliponaxis=False,
-                            textfont=dict(size=13.5, color=TEXT_DARK),
-                            hovertext=hover_brecha,
-                            hoverinfo="text",
-                        )
-                    )
-                    min_b = min(-15.0, float(piv["brecha_pp"].min()) - 14.0)
-                    max_b = max(15.0, float(piv["brecha_pp"].max()) + 16.0)
-                    fig_brecha.update_layout(
-                        height=max(380, len(piv) * 28 + 100),
-                        margin=dict(l=10, r=70, t=24, b=40),
-                        plot_bgcolor="#FFFFFF",
-                        paper_bgcolor="#FFFFFF",
-                        font=dict(
-                            family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-                            size=14,
-                            color=TEXT_DARK,
-                        ),
-                        showlegend=False,
-                        xaxis=dict(
-                            range=[min_b, max_b],
-                            ticksuffix=" pp",
-                            gridcolor="#EEF2F6",
-                            zeroline=True,
-                            zerolinecolor="#64748B",
-                            zerolinewidth=1.5,
-                            tickfont=dict(size=14, color=TEXT_MUTED),
-                            title=dict(
-                                text="Diferencia en puntos porcentuales (Ofertas − Planes)",
-                                font=dict(size=14, color=TEXT_MUTED),
-                            ),
-                        ),
-                        yaxis=dict(
-                            tickfont=dict(size=14, color=TEXT_DARK),
-                            automargin=True,
-                        ),
-                    )
-                    st.plotly_chart(
-                        fig_brecha,
-                        use_container_width=True,
-                        theme=None,
-                config={"displayModeBar": False},
-                    )
-
-
-# ===========================================================================
-# TAB 2: VISUALIZACIÓN (DETALLE, NIVELES 0–3 Y ENCUESTA)
-# ===========================================================================
-with tab_vis:
-    st.markdown(
-        '<div class="module-question">En una oferta o un programa concreto, ¿qué variables aparecen, con qué nivel y con qué cita?</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<div class="def-strip">'
-        "<strong>Niveles de evidencia:</strong> 0 = sin mención (propuesto) · "
-        "1 = mención parcial · 2 = mención explícita · 3 = explícita con aplicación. "
-        "<strong>Explícita</strong> agrupa los niveles 2 y 3."
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
-    with st.container(border=True):
-        v1, v2, v3, v4 = st.columns([1.05, 1.55, 1.25, 1.55])
-        with v1:
-            sel_fuente_det = st.selectbox(
-                "Fuente",
-                options=["Todas", "Ofertas", "Planes de estudio"],
-                index=0,
-                key="vis_fuente",
-            )
-        with v2:
-            if sel_fuente_det == "Todas":
-                avail_ids = sorted(det_df["id"].unique().tolist())
-            else:
-                avail_ids = sorted(
-                    det_df.loc[det_df["fuente"] == sel_fuente_det, "id"]
-                    .unique()
-                    .tolist()
-                )
-            sel_ids_det = st.multiselect(
-                "Oferta o programa",
-                options=avail_ids,
-                default=[],
-                placeholder=f"Todos ({len(avail_ids)} unidades)",
-                key="vis_id",
-            )
-        with v3:
-            cat_opts_det = ["Todas las categorías"] + [
-                c for c in CATEGORY_ORDER if c in det_df["categoria"].unique()
-            ]
-            sel_cat_det = st.selectbox(
-                "Categoría",
-                options=cat_opts_det,
-                index=0,
-                key="vis_cat",
-            )
-        with v4:
-            if sel_cat_det == "Todas las categorías":
-                avail_vars_det = sorted(det_df["variable"].unique().tolist())
-            else:
-                avail_vars_det = sorted(
-                    det_df.loc[det_df["categoria"] == sel_cat_det, "variable"]
-                    .unique()
-                    .tolist()
-                )
-            sel_vars_det = st.multiselect(
-                "Variable",
-                options=avail_vars_det,
-                default=[],
-                placeholder="Todas las variables",
-                key="vis_var",
-            )
-
-    filt_det = det_df.copy()
-    if sel_fuente_det != "Todas":
-        filt_det = filt_det[filt_det["fuente"] == sel_fuente_det]
-    if sel_ids_det:
-        filt_det = filt_det[filt_det["id"].isin(sel_ids_det)]
-    if sel_cat_det != "Todas las categorías":
-        filt_det = filt_det[filt_det["categoria"] == sel_cat_det]
-    if sel_vars_det:
-        filt_det = filt_det[filt_det["variable"].isin(sel_vars_det)]
-
-    if filt_det.empty:
-        st.info("No hay registros de detalle para la selección actual.")
-    else:
-        n_units = filt_det["id"].nunique()
-        n_vars_det = filt_det["variable"].nunique()
-
-        st.markdown(
-            '<div class="chart-heading">Distribución de niveles (0–3) por variable (100 % apilado)</div>',
-            unsafe_allow_html=True,
-        )
-        legend_items_html = "".join(
-            f'<span style="display:inline-flex;align-items:center;gap:0.4rem;margin-right:1.2rem;font-size:0.88rem;color:#1A2332;">'
-            f'<span style="width:13px;height:13px;border-radius:3px;background:{bg_col};display:inline-block;border:1px solid rgba(15,23,42,0.12);"></span>'
-            f'{lbl}</span>'
-            for _, lbl, bg_col, _ in NIVEL_META
-        )
-        st.markdown(
-            f'<div class="chart-sub" style="margin-bottom:0.45rem;">'
-            f"Sobre <strong>{n_units}</strong> unidad(es) seleccionada(s) y <strong>{n_vars_det}</strong> variable(s) · "
-            f"Ordenado por porcentaje explícito (nivel 2–3)."
-            f"</div>"
-            f'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.25rem;margin:0.2rem 0 0.55rem 0;">'
-            f"{legend_items_html}"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-
-        # Compute 100% stacked counts per variable x nivel
-        counts = (
-            filt_det.groupby(["variable", "nivel"])
-            .size()
-            .unstack(fill_value=0)
-        )
-        for lvl, _, _, _ in NIVEL_META:
-            if lvl not in counts.columns:
-                counts[lvl] = 0
-        counts = counts[[0, 1, 2, 3]]
-        totals = counts.sum(axis=1)
-        pcts = counts.div(totals, axis=0)
-
-        # Sort by explicit share (lvl 2 + lvl 3) desc, then partial (lvl 1) desc
-        sort_df = pd.DataFrame(
-            {
-                "explicit_pct": pcts[2] + pcts[3],
-                "partial_pct": pcts[1],
-            },
-            index=pcts.index,
-        ).sort_values(["explicit_pct", "partial_pct"], ascending=[False, False])
-        ordered_vars = list(reversed(sort_df.index.tolist()))
-
-        fig_stack = go.Figure()
-        # Add in order 3 -> 2 -> 1 -> 0 so Explicit (3, 2) sits cleanly on the left
-        for lvl, lbl, bg_col, txt_col in NIVEL_META:
-            vals = [float(pcts.loc[v, lvl]) for v in ordered_vars]
-            raw_n = [int(counts.loc[v, lvl]) for v in ordered_vars]
-            tot_n = [int(totals.loc[v]) for v in ordered_vars]
-            seg_text = [f"{p * 100:.0f}%" if p >= 0.08 else "" for p in vals]
-            hover_seg = [
-                f"<b>{v}</b><br>{lbl}<br>{p * 100:.1f}% ({rn} de {tn})"
-                for v, p, rn, tn in zip(ordered_vars, vals, raw_n, tot_n)
-            ]
-            fig_stack.add_trace(
-                go.Bar(
-                    y=ordered_vars,
-                    x=vals,
-                    name=lbl,
-                    orientation="h",
-                    marker=dict(color=bg_col, line=dict(color="#FFFFFF", width=0.8)),
-                    text=seg_text,
-                    textposition="inside",
-                    insidetextanchor="middle",
-                    textfont=dict(size=13, color=txt_col),
-                    hovertext=hover_seg,
-                    hoverinfo="text",
-                )
-            )
-
-        fig_stack.update_layout(
-            barmode="stack",
-            bargap=0.22,
-            height=max(400, n_vars_det * 35 + 80),
-            margin=dict(l=10, r=24, t=12, b=36),
-            plot_bgcolor="#FFFFFF",
-            paper_bgcolor="#FFFFFF",
-            showlegend=False,
-            font=dict(
-                family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-                size=14,
-                color=TEXT_DARK,
-            ),
-            xaxis=dict(
-                range=[0, 1.0],
-                tickformat=".0%",
-                dtick=0.2,
-                gridcolor="#EEF2F6",
-                tickfont=dict(size=14, color=TEXT_MUTED),
-                title=dict(text="Proporción de unidades por nivel (0–3)", font=dict(size=14, color=TEXT_MUTED)),
-            ),
-            yaxis=dict(
-                categoryorder="array",
-                categoryarray=ordered_vars,
-                tickfont=dict(size=14, color=TEXT_DARK),
-                automargin=True,
-            ),
-        )
-        st.plotly_chart(
-            fig_stack,
-            use_container_width=True,
-            theme=None,
-                config={"displayModeBar": False},
-        )
-
-        # Detail & Quotes Table
-        st.markdown(
-            '<div class="chart-heading">Tabla de detalle y citas literales verificadas</div>',
-            unsafe_allow_html=True,
-        )
-        ctrl_l, ctrl_m, ctrl_r = st.columns([1.8, 1.5, 1.2])
-        with ctrl_l:
-            only_mentions = st.checkbox(
-                "Mostrar solo registros con evidencia (niveles 1–3)",
-                value=True,
-                key="vis_only_mentions",
-            )
-        with ctrl_m:
-            quote_search = st.text_input(
-                "Buscar texto en cita o ID",
-                value="",
-                placeholder="Ej. Power BI, V01, PROG_...",
-                label_visibility="collapsed",
-                key="vis_quote_search",
-            )
-
-        tbl_det = filt_det.copy()
-        if only_mentions:
-            tbl_det = tbl_det[tbl_det["nivel"] >= 1]
-        if quote_search.strip():
-            q = quote_search.strip().lower()
-            mask = (
-                tbl_det["id"].astype(str).str.lower().str.contains(q, na=False)
-                | tbl_det["variable"].astype(str).str.lower().str.contains(q, na=False)
-                | tbl_det["cita_corta"].astype(str).str.lower().str.contains(q, na=False)
-                | tbl_det["cita_consulta_corta"].astype(str).str.lower().str.contains(q, na=False)
-            )
-            tbl_det = tbl_det[mask]
-
-        tbl_det = tbl_det.sort_values(
-            ["nivel", "id", "variable"], ascending=[False, True, True]
-        )
-
-        has_planes = "Planes de estudio" in tbl_det["fuente"].unique()
-        total_rows_det = len(tbl_det)
-        page_size = 10
-        total_pages = max(1, (total_rows_det + page_size - 1) // page_size)
-
-        with ctrl_r:
-            csv_bytes = tbl_det.to_csv(index=False).encode("utf-8-sig")
-            st.download_button(
-                "Descargar CSV filtrado",
-                data=csv_bytes,
-                file_name="unir_detalle_filtrado.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
-
-        st.markdown(
-            f'<div class="chart-sub">Mostrando {min(page_size, total_rows_det)} de {total_rows_det:,} registros filtrados (ordenados de nivel 3 a 0). Las citas están recortadas a ~220 caracteres desde la hoja v9.</div>',
-            unsafe_allow_html=True,
-        )
-
-        if total_rows_det == 0:
-            st.info("No hay citas que coincidan con el filtro actual.")
+# ================================================================ ENCUESTA
+with t_enc:
+    meta = enc[["pregunta", "texto_pregunta", "n_respuestas_validas", "N_formulario"]].drop_duplicates("pregunta")
+    graf = [q for q in meta.pregunta if q != "P10"]
+    a, b = st.columns([2.35, 1])
+    with a:
+        q = st.selectbox("Pregunta", graf, key="q_sel",
+                         format_func=lambda x: f"{x} · {meta.set_index('pregunta').loc[x, 'texto_pregunta']}" + (" · PENDIENTE" if x in ("P04", "P09") else ""))
+        s = enc[enc.pregunta == q].copy()
+        if q in ("P05", "P07", "P09"):
+            s["o"] = pd.to_numeric(s.opcion, errors="coerce")
+            s = s.sort_values("o", ascending=False)
         else:
-            page_num = 1
-            if total_pages > 1:
-                p_col1, p_col2 = st.columns([1.2, 4.0])
-                with p_col1:
-                    page_num = int(
-                        st.number_input(
-                            f"Página (1–{total_pages})",
-                            min_value=1,
-                            max_value=total_pages,
-                            value=1,
-                            step=1,
-                            key="vis_page_num",
-                        )
-                    )
-            start_idx = (page_num - 1) * page_size
-            page_df = tbl_det.iloc[start_idx : start_idx + page_size]
-
-            # Build clean HTML table with full wrapping for citas
-            headers_html = (
-                "<th>ID</th>"
-                "<th>Fuente</th>"
-                "<th>Variable</th>"
-                "<th>Nivel</th>"
-                "<th>Expl.</th>"
-                "<th>Cita literal corta</th>"
-                "<th>Ubicación</th>"
-            )
-            if has_planes:
-                headers_html += (
-                    "<th>N. cons.</th>"
-                    "<th>N. c/cons.</th>"
-                    "<th>Cita consulta corta</th>"
-                )
-
-            rows_html = []
-            for _, r in page_df.iterrows():
-                lvl = int(r["nivel"])
-                exp_txt = "Sí (1)" if int(r["presencia_explicita"]) == 1 else "No (0)"
-                cita = (
-                    html.escape(str(r["cita_corta"]))
-                    if pd.notna(r["cita_corta"]) and str(r["cita_corta"]).strip()
-                    else '<span style="color:#94A3B8;">—</span>'
-                )
-                ubic = (
-                    html.escape(str(r["ubicacion"]))
-                    if pd.notna(r["ubicacion"]) and str(r["ubicacion"]).strip()
-                    else '<span style="color:#94A3B8;">—</span>'
-                )
-                fuente_short = "Planes" if r["fuente"] == "Planes de estudio" else html.escape(str(r["fuente"]))
-                row_cells = (
-                    f"<td style='white-space:nowrap;'><strong>{html.escape(str(r['id']))}</strong></td>"
-                    f"<td style='white-space:nowrap;'>{fuente_short}</td>"
-                    f"<td style='min-width:110px;max-width:155px;'>{html.escape(str(r['variable']))}</td>"
-                    f'<td style="white-space:nowrap;"><span class="lvl-pill lvl-{lvl}">Nivel {lvl}</span></td>'
-                    f"<td style='white-space:nowrap;'>{exp_txt}</td>"
-                    f'<td style="min-width:240px;max-width:360px;">{cita}</td>'
-                    f'<td style="min-width:150px;max-width:210px;word-break:break-word;font-size:0.82rem;color:#475569;">{ubic}</td>'
-                )
-                if has_planes:
-                    nc = (
-                        f"{int(r['nivel_consulta'])}"
-                        if pd.notna(r["nivel_consulta"])
-                        else "—"
-                    )
-                    ncc = (
-                        f"{int(r['nivel_con_consulta'])}"
-                        if pd.notna(r["nivel_con_consulta"])
-                        else "—"
-                    )
-                    cc = (
-                        html.escape(str(r["cita_consulta_corta"]))
-                        if pd.notna(r["cita_consulta_corta"])
-                        and str(r["cita_consulta_corta"]).strip()
-                        else '<span style="color:#94A3B8;">—</span>'
-                    )
-                    row_cells += (
-                        f"<td style='text-align:center;white-space:nowrap;'>{nc}</td>"
-                        f"<td style='text-align:center;white-space:nowrap;'>{ncc}</td>"
-                        f'<td style="min-width:140px;max-width:220px;font-size:0.83rem;">{cc}</td>'
-                    )
-                rows_html.append(f"<tr>{row_cells}</tr>")
-
+            s = s.sort_values("porcentaje").tail(9)
+        with st.container(key="card_q_chart"):
+            pend = q in ("P04", "P09")
+            card_head(("⚠ PENDIENTE · " if pend else "") + meta.set_index("pregunta").loc[q, "texto_pregunta"],
+                      f"{int(s.N.max())} respuestas válidas" + (" · solo opciones más frecuentes" if len(enc[enc.pregunta == q]) > 9 else ""))
+            fig = go.Figure(go.Bar(
+                y=[str(o) if len(str(o)) <= 34 else str(o)[:32] + "…" for o in s.opcion], x=s.porcentaje, orientation="h",
+                marker_color="#C9A227" if pend else PURPLE,
+                text=[f"{p*100:.0f}% ({int(n)} de {int(N)})" for p, n, N in zip(s.porcentaje, s.n, s.N)],
+                textposition="outside", cliponaxis=False, textfont=dict(size=13, color=INK),
+                hovertemplate="%{y}: %{x:.1%}<extra></extra>"))
+            base_layout(fig, 300, showlegend=False,
+                        xaxis=dict(range=[0, max(0.4, s.porcentaje.max() * 1.45)], tickformat=".0%", gridcolor="#EEF0F4", tickfont=dict(size=12, color=MUTED)),
+                        yaxis=dict(tickfont=dict(size=13), automargin=True))
+            show(fig)
+    with b:
+        with st.container(key="card_q_flags"):
+            card_head("Estado de las preguntas")
             st.markdown(
-                f"""
-                <div class="detail-table-wrap">
-                    <table class="detail-table">
-                        <thead><tr>{headers_html}</tr></thead>
-                        <tbody>{"".join(rows_html)}</tbody>
-                    </table>
-                </div>
-                """,
+                f"""<div class="flag"><span class="tag p">P04 · PENDIENTE</span>Falta la regla para respuestas con ≠ 3 opciones.</div>
+                <div class="flag"><span class="tag p">P09 · PENDIENTE</span>Escala por verificar (1 a 8). <b>No usar en conclusiones.</b></div>
+                <div class="flag"><span class="tag o">P10 · ABIERTA</span>45 de 54 respuestas en texto libre, sin codificar; no se grafica.</div>
+                <div class="flag"><span class="tag o">RESTO</span>Procesadas el 14-oct-2026, sin IA; sin cambios el 30-oct.</div>""",
                 unsafe_allow_html=True,
             )
-
-    # -----------------------------------------------------------------------
-    # Survey Section (Encuesta)
-    # -----------------------------------------------------------------------
-    st.markdown("<hr style='margin: 2.2rem 0 1.5rem 0; border-color: #E2E8F0;'>", unsafe_allow_html=True)
-    st.markdown(
-        '<div class="module-question">Encuesta · ¿Cómo se describen las personas que respondieron, y qué herramientas dicen usar?</div>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '<div class="chart-sub">'
-        "54 respuestas del formulario procesadas el 14-oct-2026 (sin IA; sin cambios en la relectura del 30-oct). "
-        "Bloque separado de los niveles 0–3 de documentos y ofertas."
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        """
-        <div class="survey-flags-grid">
-            <div class="flag-card">
-                <span class="flag-badge">P04 · Pendiente</span><br>
-                Falta definir la regla para respuestas con un número de opciones distinto de 3.
-            </div>
-            <div class="flag-card">
-                <span class="flag-badge">P09 · Pendiente</span><br>
-                Escala por verificar (valores observados 1 a 8). <strong>No usar en conclusiones.</strong>
-            </div>
-            <div class="flag-card neutral">
-                <span class="flag-badge neutral">P10 · Texto abierto</span><br>
-                45 de 54 respuestas abiertas sin codificar; no se grafica distribución.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    preg_meta = (
-        enc_df[["pregunta", "texto_pregunta", "medida", "n_respuestas_validas", "estado"]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-    )
-
-    def format_preg(p_code: str) -> str:
-        row = preg_meta[preg_meta["pregunta"] == p_code].iloc[0]
-        tag = ""
-        if p_code in ("P04", "P09"):
-            tag = " [PENDIENTE]"
-        elif p_code == "P10":
-            tag = " [Texto abierto sin codificar]"
-        return f"{p_code} · {row['texto_pregunta']}{tag}"
-
-    sel_preg = st.selectbox(
-        "Pregunta de la encuesta",
-        options=preg_meta["pregunta"].tolist(),
-        index=0,
-        format_func=format_preg,
-        key="enc_preg",
-    )
-
-    sub_enc = enc_df[enc_df["pregunta"] == sel_preg].copy()
-    preg_info = preg_meta[preg_meta["pregunta"] == sel_preg].iloc[0]
-
-    if sel_preg == "P04":
-        st.markdown(
-            '<div class="callout-warn">'
-            "<strong>P04 · PENDIENTE:</strong> falta definir la regla de conteo para respuestas "
-            "con un número de opciones distinto de 3. Cifras preliminares sujetas a revisión."
-            "</div>",
-            unsafe_allow_html=True,
-        )
-    elif sel_preg == "P09":
-        st.markdown(
-            '<div class="callout-warn">'
-            "<strong>P09 · PENDIENTE — NO USAR EN CONCLUSIONES:</strong> escala por verificar "
-            "(valores observados 1 a 8). No presentar como resultado de alineación hasta validar "
-            "el rango original del formulario."
-            "</div>",
-            unsafe_allow_html=True,
-        )
-
-    if sel_preg == "P10":
-        st.markdown(
-            '<div class="callout-info">'
-            "<strong>P10 · Asignatura obligatoria que agregaría (respuesta abierta):</strong> "
-            "se registraron <strong>45 de 54</strong> respuestas en texto libre sin codificar. "
-            "De acuerdo con la especificación metodológica, no se grafica una distribución por opción."
-            "</div>",
-            unsafe_allow_html=True,
-        )
-    else:
-        # Preserve numeric scale order for P05, P07, P09; sort by porcentaje desc for categorical questions
-        if sel_preg in ("P05", "P07", "P09"):
-            sub_enc["_ord"] = pd.to_numeric(sub_enc["opcion"], errors="coerce")
-            sub_enc = sub_enc.sort_values("_ord", ascending=False).drop(columns=["_ord"])
-        else:
-            sub_enc = sub_enc.sort_values(["porcentaje", "opcion"], ascending=[True, False])
-
-        col_chart, col_tbl = st.columns([1.45, 1.05], gap="large")
-        with col_chart:
-            bar_col = "#B45309" if sel_preg in ("P04", "P09") else PRIMARY_NAVY
-            labels_enc = [
-                f"{round(p * 100):.0f}% ({int(n)} de {int(N)})"
-                for p, n, N in zip(sub_enc["porcentaje"], sub_enc["n"], sub_enc["N"])
-            ]
-            fig_enc = go.Figure(
-                go.Bar(
-                    y=sub_enc["opcion"].astype(str),
-                    x=sub_enc["porcentaje"],
-                    orientation="h",
-                    marker=dict(color=bar_col),
-                    text=labels_enc,
-                    textposition="outside",
-                    cliponaxis=False,
-                    textfont=dict(size=13.5, color=TEXT_DARK),
-                    hovertemplate="<b>%{y}</b><br>%{x:.1%}<extra></extra>",
-                )
-            )
-            fig_enc.update_layout(
-                height=max(300, len(sub_enc) * 34 + 80),
-                margin=dict(l=10, r=125, t=16, b=36),
-                plot_bgcolor="#FFFFFF",
-                paper_bgcolor="#FFFFFF",
-                font=dict(
-                    family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-                    size=14,
-                    color=TEXT_DARK,
-                ),
-                xaxis=dict(
-                    range=[0, max(0.35, float(sub_enc["porcentaje"].max()) * 1.32)],
-                    tickformat=".0%",
-                    gridcolor="#EEF2F6",
-                    tickfont=dict(size=13.5, color=TEXT_MUTED),
-                ),
-                yaxis=dict(
-                    tickfont=dict(size=13.5, color=TEXT_DARK),
-                    automargin=True,
-                ),
-            )
-            st.plotly_chart(
-                fig_enc,
-                use_container_width=True,
-                theme=None,
-                config={"displayModeBar": False},
-            )
-
-        with col_tbl:
-            tbl_enc_show = sub_enc.iloc[::-1][
-                ["opcion", "n", "N", "porcentaje", "criterios_asociados"]
-            ].copy()
-            tbl_enc_show["Porcentaje"] = (tbl_enc_show["porcentaje"] * 100).round(1)
-            tbl_enc_show["Criterios"] = tbl_enc_show["criterios_asociados"].fillna("—")
-            tbl_enc_show = tbl_enc_show[
-                ["opcion", "n", "N", "Porcentaje", "Criterios"]
-            ].rename(columns={"opcion": "Opción"})
-            st.dataframe(
-                tbl_enc_show,
-                use_container_width=True,
-                hide_index=True,
-                height=min(420, 44 + len(tbl_enc_show) * 36),
-                column_config={
-                    "Opción": st.column_config.TextColumn("Opción", width="medium"),
-                    "n": st.column_config.NumberColumn("n", format="%d", width="small"),
-                    "N": st.column_config.NumberColumn("N", format="%d", width="small"),
-                    "Porcentaje": st.column_config.NumberColumn(
-                        "%", format="%.1f%%", width="small"
-                    ),
-                    "Criterios": st.column_config.TextColumn("Criterios", width="small"),
-                },
-            )
-
-# ---------------------------------------------------------------------------
-# Footer & Methodological Notes
-# ---------------------------------------------------------------------------
-st.markdown(
-    """
-<div class="footer-box">
-    <strong>Fuentes y estado preliminar:</strong> Cifras provenientes de la hoja
-    <em>UNIR_resultados_legible_v9</em> (relectura completa del 30-oct-2026 sobre 51 avisos completos
-    de 75 originales y 29 planes de estudio; encuesta procesada el 14-oct-2026 sobre 54 respuestas).
-    Todas las cifras de ofertas y planes tienen estado <strong>preliminar</strong> y están pendientes de
-    validación oficial con el clasificador y el juez. No se usan columnas antiguas con N=75, no se recalculan
-    uniones agrupadas y no se afirman conclusiones sobre «Toma de decisiones» ni «P09».
-    <strong>Uso privado para revisión de Sophie; no compartir ni publicar sin autorización.</strong>
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-with st.expander("Ver notas metodológicas completas (30 registros de tab_notas.csv)"):
-    notas_show = notas_df.rename(columns={"campo": "Campo", "contenido": "Contenido"})
-    st.dataframe(
-        notas_show,
-        use_container_width=True,
-        hide_index=True,
-        height=420,
-        column_config={
-            "Campo": st.column_config.TextColumn("Campo", width="medium"),
-            "Contenido": st.column_config.TextColumn("Contenido", width="large"),
-        },
-    )
+        with st.container(key="card_q_kpi"):
+            card_head("Respuestas del formulario")
+            st.markdown(f'<div class="big">{N_ENC}</div><p class="card-sub">Bloque separado de los niveles 0–3 de ofertas y planes.</p>',
+                        unsafe_allow_html=True)
